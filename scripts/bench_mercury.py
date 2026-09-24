@@ -4,11 +4,11 @@
 Measures TTFT, decode tokens/sec and end-to-end tokens/sec over N runs.
 Stdlib only -- no pip install required.
 
-  python3 bench_mercury.py                          # default: 5 streamed runs
-  python3 bench_mercury.py --runs 10 --max-tokens 1024
-  python3 bench_mercury.py --diffusing              # Mercury's diffusion-style streaming
-  python3 bench_mercury.py --no-stream              # e2e latency only
-  python3 bench_mercury.py --list-models
+  python3 scripts/bench_mercury.py                          # default: 5 streamed runs
+  python3 scripts/bench_mercury.py --runs 10 --max-tokens 1024
+  python3 scripts/bench_mercury.py --diffusing              # Mercury's diffusion-style streaming
+  python3 scripts/bench_mercury.py --no-stream              # e2e latency only
+  python3 scripts/bench_mercury.py --list-models
 """
 
 import argparse
@@ -246,7 +246,7 @@ def summarize(values, unit, label):
 
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
-    load_env_file(os.path.join(here, ".env"))
+    load_env_file(os.path.join(here, "..", ".env"))
 
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)

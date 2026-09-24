@@ -4,10 +4,10 @@
 Streams responses, keeps conversation history, and reuses one TLS connection.
 Stdlib only.
 
-  python3 chat_mercury.py
-  python3 chat_mercury.py --model mercury-2.5 --effort high
-  python3 chat_mercury.py --system "You are a terse Rust expert."
-  echo "explain diffusion LMs" | python3 chat_mercury.py   # one-shot from a pipe
+  python3 scripts/chat_mercury.py
+  python3 scripts/chat_mercury.py --model mercury-2.5 --effort high
+  python3 scripts/chat_mercury.py --system "You are a terse Rust expert."
+  echo "explain diffusion LMs" | python3 scripts/chat_mercury.py   # one-shot from a pipe
 
 In-chat commands: /help /reset /undo /system /model /effort /temp /diffuse
                   /tokens /save /history /exit
@@ -262,7 +262,7 @@ class Chat:
 
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
-    load_env_file(os.path.join(here, ".env"))
+    load_env_file(os.path.join(here, "..", ".env"))
 
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)

@@ -7,9 +7,9 @@ snapshots and reports, for each step, how much of the ALREADY-EMITTED text the
 model went back and rewrote -- i.e. non-causal revision, the thing an
 autoregressive model structurally cannot do.
 
-  python3 denoise_trace.py "Explain diffusion models in 3 sentences."
-  python3 denoise_trace.py --model mercury-2 --show-snapshots
-  python3 denoise_trace.py --max-tokens 800 --json trace.json
+  python3 scripts/denoise_trace.py "Explain diffusion models in 3 sentences."
+  python3 scripts/denoise_trace.py --model mercury-2 --show-snapshots
+  python3 scripts/denoise_trace.py --max-tokens 800 --json trace.json
 """
 
 import argparse
@@ -224,7 +224,7 @@ def analyze(prev, cur):
 
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
-    load_env_file(os.path.join(here, ".env"))
+    load_env_file(os.path.join(here, "..", ".env"))
 
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
