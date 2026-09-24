@@ -1,0 +1,50 @@
+#!/bin/bash -l
+# Build llama.cpp's llama-diffusion-cli (DiffusionGemma, PR #24423) on an SCC compute node.
+#
+# Submit from the directory that holds (or should hold) the llama.cpp checkout:
+#   cd /projectnb/<your_project>/$USER
+#   qsub -P <your_project> /path/to/scripts/build_llamacpp.qsub
+#
+# Overrides (comma-separated):
+#   qsub -P <your_project> -v CUDA_ARCH="86;89",CUDA_MODULE=cuda/12.5 build_llamacpp.qsub
+#     CUDA_ARCH    80=A100  86=A40/A6000  89=L40S/L40/RTX6000ada  90=H200   (default 89)
+#     CUDA_MODULE  module to load for nvcc                                    (default cuda)
+#     LLAMA_DIR    llama.cpp checkout                          (default ./llama.cpp)
+#     CLEAN=1      wipe build/ first (needed after changing CUDA_ARCH)
+
+#$ -N build_llamacpp
+#$ -cwd
+#$ -pe omp 8
+#$ -l mem_per_core=4G
+#$ -l h_rt=02:00:00
+#$ -j y
+#$ -o build_llamacpp.log
+
+set -euo pipefail
+
+CUDA_ARCH=${CUDA_ARCH:-89}
+CUDA_MODULE=${CUDA_MODULE:-cuda}
+LLAMA_DIR=${LLAMA_DIR:-$PWD/llama.cpp}
+
+module load gcc cmake "$CUDA_MODULE"
+echo "host=$(hostname) slots=$NSLOTS arch=$CUDA_ARCH dir=$LLAMA_DIR"
+nvcc --version | tail -1
+
+if [ ! -d "$LLAMA_DIR" ]; then
+    git clone https://github.com/ggml-org/llama.cpp "$LLAMA_DIR"
+fi
+cd "$LLAMA_DIR"
+
+if [ "$(git branch --show-current)" != "diffusiongemma" ]; then
+    git fetch origin pull/24423/head:diffusiongemma
+    git checkout diffusiongemma
+fi
+
+if [ "${CLEAN:-0}" = "1" ]; then
+    rm -rf build
+fi
+
+cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES="$CUDA_ARCH"
+cmake --build build -j "$NSLOTS" --config Release --target llama-diffusion-cli
+
+echo "done: $LLAMA_DIR/build/bin/llama-diffusion-cli"
