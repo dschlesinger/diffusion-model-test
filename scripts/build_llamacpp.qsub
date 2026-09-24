@@ -1,5 +1,6 @@
 #!/bin/bash -l
-# Build llama.cpp's llama-diffusion-cli (DiffusionGemma, PR #24423) on an SCC compute node.
+# Build llama.cpp's llama-diffusion-cli and llama-diffusion-gemma-visual-server (DiffusionGemma,
+# PR #24423) on an SCC compute node.
 #
 # Submit from the directory that holds (or should hold) the llama.cpp checkout:
 #   cd /projectnb/<your_project>/$USER
@@ -45,6 +46,7 @@ if [ "${CLEAN:-0}" = "1" ]; then
 fi
 
 cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES="$CUDA_ARCH"
-cmake --build build -j "$NSLOTS" --config Release --target llama-diffusion-cli
+cmake --build build -j "$NSLOTS" --config Release \
+    --target llama-diffusion-cli llama-diffusion-gemma-visual-server
 
-echo "done: $LLAMA_DIR/build/bin/llama-diffusion-cli"
+echo "done: $LLAMA_DIR/build/bin/{llama-diffusion-cli,llama-diffusion-gemma-visual-server}"

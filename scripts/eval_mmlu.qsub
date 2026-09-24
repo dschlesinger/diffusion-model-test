@@ -1,0 +1,37 @@
+#!/bin/bash -l
+# Run the MMLU eval (scripts/eval_mmlu.py) on an SCC GPU node.
+#
+# Submit from the repo root:
+#   qsub -P <your_project> -v MODEL=/projectnb/.../model-Q8_0.gguf scripts/eval_mmlu.qsub
+#
+# Overrides (comma-separated, via -v):
+#   MODEL        GGUF path (required)
+#   LLAMA_BIN    dir holding llama-diffusion-gemma-visual-server (default ./llama.cpp/build/bin)
+#   OUT          results JSONL (default mmlu_results.jsonl; rerun with the same OUT to resume)
+#   EVAL_ARGS    extra eval_mmlu.py flags, e.g. EVAL_ARGS="--per-subject 20 --shots 5"
+#   CUDA_MODULE  default cuda/12.5
+
+#$ -N eval_mmlu
+#$ -cwd
+#$ -l gpus=1
+#$ -l gpu_type=L40S
+#$ -pe omp 4
+#$ -l h_rt=12:00:00
+#$ -j y
+#$ -o eval_mmlu.log
+
+set -euo pipefail
+
+: "${MODEL:?set MODEL=/path/to/model.gguf with qsub -v}"
+LLAMA_BIN=${LLAMA_BIN:-$PWD/llama.cpp/build/bin}
+OUT=${OUT:-mmlu_results.jsonl}
+CUDA_MODULE=${CUDA_MODULE:-cuda/12.5}
+
+module load gcc python3 "$CUDA_MODULE"
+echo "host=$(hostname) gpu=$(nvidia-smi --query-gpu=name --format=csv,noheader) model=$MODEL out=$OUT"
+
+python3 scripts/eval_mmlu.py \
+    --model "$MODEL" \
+    --server "$LLAMA_BIN/llama-diffusion-gemma-visual-server" \
+    --out "$OUT" \
+    ${EVAL_ARGS:-}

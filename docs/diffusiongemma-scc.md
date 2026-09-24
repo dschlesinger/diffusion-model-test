@@ -158,3 +158,22 @@ throughput: 89.3 tok/s (1536 tok in 17208.44ms), in-step parallel 3288 tok/s
 | Reply stops mid-sentence after exactly 256 tokens / 1 block | `-n` is too small or missing. Set `-n 2048` or higher. Thinking tokens count against `-n`, so the answer may not have started yet. |
 | `no kernel image is available for execution on the device` | The binary wasn't built for this GPU's architecture. Rebuild with `CUDA_ARCH` including it, plus `CLEAN=1`. |
 | Out of GPU memory | Use `Q4_K_M`, or lower `-c`/`-ub`. |
+
+## 9. Evaluating on MMLU
+
+`scripts/eval_mmlu.py` runs MMLU through `llama-diffusion-gemma-visual-server`. That server is built by the same qsub job and loads the model once for the whole run. Each question is answered as generated text, including any thinking, and the script pulls the letter out of an `Answer: X` line.
+
+```bash
+pip install --user datasets    # one time, with `module load python3`
+
+# quick smoke test on an interactive GPU node
+python3 scripts/eval_mmlu.py --model <gguf> --limit 20
+
+# batch job: 20 questions per subject (1,140 total), results resumable in mmlu_q8.jsonl
+qsub -P buaisociety -v MODEL=<gguf>,OUT=mmlu_q8.jsonl,EVAL_ARGS="--per-subject 20" scripts/eval_mmlu.qsub
+
+# summary of a results file (micro/macro accuracy, parse failures, tok/s, per-subject)
+python3 scripts/eval_mmlu.py --summarize mmlu_q8.jsonl
+```
+
+Useful flags: `--shots 5` (the standard 5-shot setup, using the dev split), `--n-blocks` (the cap on tokens per answer, in 256-token blocks, default 8), `--subjects`, and `--system`. Every result row stores the raw output, so you can check why an answer was marked wrong.
