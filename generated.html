@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paws & Paths | Professional Dog Walking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+       .hero-bg {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1516734815184-eaca25677ad54e?auto=format&fit=crop&q=80&w=2070');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-2xl font-bold text-orange-600 flex items-center">
+                <i class="fas fa-paw mr-2"></i>Paws & Paths
+            </div>
+            <div class="hidden md:flex space-x-8 font-medium">
+                <a href="#services" class="hover:text-orange-600">Services</a>
+                <a href="#about" class="hover:text-orange-600">Why Us</a>
+                <a href="#testimonials" class="hover:text-orange-600">Testimonials</a>
+            </div>
+            <a href="#contact" class="bg-orange-600 text-white px-6 py-2 rounded-full hover:bg-orange-700 transition">Book Now</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-bg h-[600px] flex items-center justify-center text-center text-white px-4">
+        <div>
+            <h1 class="text-5xl md:text-6xl font-bold mb-4">Your Best Friend,<br>Happy While You're Away</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">Professional, reliable, and loving dog walking services in [Your City]. We treat every pup like our own.</p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <a href="#contact" class="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-lg text-lg font-bold transition">Get Free Greet</a>
+                <a href="#services" class="bg-white hover:bg-gray-100 text-gray-900 px-8 py-4 rounded-lg text-lg font-bold transition">View Services</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-16">Our Services</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Service 1 -->
+            <div class="bg-white p-8 rounded-xl shadow-md text-center hover:translate-y-2 transition">
+                <div class="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                    <i class="fas fa-dog"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">Solo Walks</h3>
+                <p class="text-gray-600">One-on-one attention for dogs who prefer a quiet pace or are anxious around other dogs.</p>
+            </div>
+            <!-- Service 2 -->
+            <div class="bg-white p-8 rounded-xl shadow-md text-center hover:translate-y-2 transition">
+                <div class="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                    <i class="fas fa-group"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">Group Adventures</h3>
+                <p class="text-gray-600">Socialized pack walks for dogs who love playing and burning off energy together.</p>
+            </div>
+            <!-- Service 3 -->
+            <div class="bg-white p-8 rounded-xl shadow-md text-center hover:translate-y-2 transition">
+                <div class="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                    <i class="fas fa-baby"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">Puppy Breaks</h3>
+                <p class="text-gray-600">Short visits for potty training, feeding, and essential cuddles for little ones.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section id="about" class="bg-orange-100 py-20">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl font-bold mb-6">Why Pet Parents Trust Us</h2>
+                    <ul class="space-y-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-shield-alt text-orange-600 text-2xl mr-4"></i>
+                            <div>
+                                <h4 class="font-bold text-xl">Insured & Bonded</h4>
+                                <p class="text-gray-600">We are fully insured for your total peace of mind.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-orange-600 text-2xl mr-4"></i>
+                            <div>
+                                <h4 class="font-bold text-xl">GPS Tracking</h4>
+                                <p class="text-gray-600">See exactly where your dog goes in real-time.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-camera text-orange-600 text-2xl mr-4"></i>
+                            <div>
+                                <h4 class="font-bold text-xl">Photo Updates</h4>
+                                <p class="text-gray-600">Receive a digital report and a cute photo after every walk.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <img src="https://images.unsplash.com/photo-1583541653828-ea2b17777ee1?auto=format&fit=crop&q=80&w=1000" alt="Dog walking" class="rounded-xl shadow-2xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 container mx-auto px-4">
+        <div class="max-w-xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-8">Ready to Start?</h2>
+            <p class="text-center text-gray-600 mb-12">Fill out the form below to schedule your free meet-and-greet!</p>
+            <form class="space-y-4">
+                <input type="text" placeholder="Your Name" class="w-full p-4 rounded-lg border focus:ring-2 focus:ring-orange-500 outline-none">
+                <input type="email" placeholder="Email Address" class="w-full p-4 rounded-lg border focus:ring-2 focus:ring-orange-500 outline-none">
+                <input type="text" placeholder="Dog's Name & Breed" class="w-full p-4 rounded-lg border focus:ring-2 focus:ring-orange-500 outline-none">
+                <select class="w-full p-4 rounded-lg border focus:ring-2 focus:ring-orange-500 outline-none">
+                    <option>Select Service</option>
+                    <option>Solo Walk</option>
+                    <option>Group Adventure</option>
+                    <option>Puppy Visit</option>
+                </select>
+                <button class="w-full bg-orange-600 text-white font-bold py-4 rounded-lg hover:bg-orange-700 transition">Send Request</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 text-center">
+        <p>&copy; 2023 Paws & Paths Dog Walking. All rights reserved.</p>
+        <div class="mt-4 flex justify-center space-x-6 text-2xl">
+            <a href="#" class="hover:text-orange-500"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="hover:text-orange-500"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="hover:text-orange-500"><i class="fas fa-envelope"></i></a>
+        </div>
+    </footer>
+
+</body>
+</html>
