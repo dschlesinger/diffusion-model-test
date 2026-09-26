@@ -1,0 +1,43 @@
+#!/bin/bash -l
+# Run diffusion_http_server.py on an SCC GPU node and keep it alive as a long job.
+#
+# Submit from the repo root:
+#   qsub -P <your_project> -v MODEL=/projectnb/.../model-Q8_0.gguf scripts/diffusion_http_server.qsub
+#
+# Overrides (comma-separated, via -v):
+#   MODEL        GGUF path (required)
+#   LLAMA_BIN    dir holding llama-diffusion-gemma-visual-server (default ./llama.cpp/build/bin)
+#   PORT         default 8000
+#   CUDA_MODULE  default cuda/12.5
+#
+# Once it's running, find the compute node with `qstat -u $USER`, then tunnel from your
+# own machine (see docs/diffusiongemma-scc.md #10):
+#   ssh -L 8000:<compute-node-hostname>:8000 <user>@scc1.bu.edu
+#
+# Kill the job with `qdel <job-id>` when you're done -- it runs until h_rt or you stop it.
+
+#$ -N diffusion_http
+#$ -cwd
+#$ -l gpus=1
+#$ -l gpu_type=L40S
+#$ -pe omp 4
+#$ -l h_rt=12:00:00
+#$ -j y
+#$ -o diffusion_http.log
+
+set -euo pipefail
+
+: "${MODEL:?set MODEL=/path/to/model.gguf with qsub -v}"
+LLAMA_BIN=${LLAMA_BIN:-$PWD/llama.cpp/build/bin}
+PORT=${PORT:-8000}
+CUDA_MODULE=${CUDA_MODULE:-cuda/12.5}
+
+module load gcc python3 "$CUDA_MODULE"
+echo "host=$(hostname) gpu=$(nvidia-smi --query-gpu=name --format=csv,noheader) model=$MODEL port=$PORT"
+echo "tunnel from your machine: ssh -L ${PORT}:$(hostname):${PORT} \$USER@scc1.bu.edu"
+
+python3 scripts/diffusion_http_server.py \
+    --model "$MODEL" \
+    --server "$LLAMA_BIN/llama-diffusion-gemma-visual-server" \
+    --host 0.0.0.0 \
+    --port "$PORT"

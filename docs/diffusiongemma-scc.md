@@ -182,13 +182,15 @@ Useful flags: `--shots 5` (the standard 5-shot setup, using the dev split), `--n
 
 `llama-diffusion-gemma-visual-server` only speaks stdin/stdout (no socket), so nothing off the node can reach it directly. `scripts/diffusion_http_server.py` wraps one instance of it and exposes an OpenAI-shaped `/v1/chat/completions` endpoint over HTTP.
 
-On the GPU node:
+Submit it as a long-running batch job with `scripts/diffusion_http_server.qsub`:
 
 ```bash
-python3 scripts/diffusion_http_server.py --model <gguf> --host 0.0.0.0 --port 8000
+qsub -P buaisociety -v MODEL=<gguf> scripts/diffusion_http_server.qsub
+qstat -u $USER                       # find the compute node it landed on
+tail -f diffusion_http.log           # prints host, GPU, and the tunnel command below
 ```
 
-SCC compute nodes aren't reachable from off-campus directly, so tunnel through the login node from your own machine:
+SCC compute nodes aren't reachable from off-campus directly, so tunnel through the login node from your own machine (hostname is in `diffusion_http.log`):
 
 ```bash
 ssh -L 8000:<compute-node-hostname>:8000 <user>@scc1.bu.edu
@@ -197,10 +199,14 @@ ssh -L 8000:<compute-node-hostname>:8000 <user>@scc1.bu.edu
 Then, from your own computer:
 
 ```bash
+python3 scripts/test_diffusion_http.py --url http://localhost:8000
+
 curl http://localhost:8000/v1/chat/completions \
     -H "Content-Type: application/json" \
     -d '{"messages": [{"role": "user", "content": "Explain diffusion models in 3 sentences."}]}'
 ```
+
+Stop the server with `qdel <job-id>` -- it otherwise runs until `h_rt` (12h default).
 
 Response shape:
 
