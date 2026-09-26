@@ -10,6 +10,7 @@
 #   OUT          results JSONL (default mmlu_results.jsonl; rerun with the same OUT to resume)
 #   EVAL_ARGS    extra eval_mmlu.py flags, e.g. EVAL_ARGS="--per-subject 20 --shots 5"
 #   CUDA_MODULE  default cuda/12.5
+#   CONDA_ENV    conda env with the `datasets` package installed (default llms)
 
 #$ -N eval_mmlu
 #$ -cwd
@@ -26,9 +27,14 @@ set -euo pipefail
 LLAMA_BIN=${LLAMA_BIN:-$PWD/llama.cpp/build/bin}
 OUT=${OUT:-mmlu_results.jsonl}
 CUDA_MODULE=${CUDA_MODULE:-cuda/12.5}
+CONDA_ENV=${CONDA_ENV:-llms}
 
-module load gcc python3 "$CUDA_MODULE"
+# gcc/CUDA come from modules; python comes from conda, not `module load python3` --
+# loading both fights over PATH, so conda goes last and wins.
+module load gcc "$CUDA_MODULE"
+conda activate "$CONDA_ENV"
 echo "host=$(hostname) gpu=$(nvidia-smi --query-gpu=name --format=csv,noheader) model=$MODEL out=$OUT"
+echo "python3=$(command -v python3)  datasets=$(python3 -c 'import datasets; print(datasets.__file__)' 2>&1)"
 
 python3 scripts/eval_mmlu.py \
     --model "$MODEL" \
