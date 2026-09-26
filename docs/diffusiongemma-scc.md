@@ -177,3 +177,42 @@ python3 scripts/eval_mmlu.py --summarize mmlu_q8.jsonl
 ```
 
 Useful flags: `--shots 5` (the standard 5-shot setup, using the dev split), `--n-blocks` (the cap on tokens per answer, in 256-token blocks, default 8), `--subjects`, and `--system`. Every result row stores the raw output, so you can check why an answer was marked wrong.
+
+## 10. Calling it over HTTP
+
+`llama-diffusion-gemma-visual-server` only speaks stdin/stdout (no socket), so nothing off the node can reach it directly. `scripts/diffusion_http_server.py` wraps one instance of it and exposes an OpenAI-shaped `/v1/chat/completions` endpoint over HTTP.
+
+On the GPU node:
+
+```bash
+python3 scripts/diffusion_http_server.py --model <gguf> --host 0.0.0.0 --port 8000
+```
+
+SCC compute nodes aren't reachable from off-campus directly, so tunnel through the login node from your own machine:
+
+```bash
+ssh -L 8000:<compute-node-hostname>:8000 <user>@scc1.bu.edu
+```
+
+Then, from your own computer:
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{"messages": [{"role": "user", "content": "Explain diffusion models in 3 sentences."}]}'
+```
+
+Response shape:
+
+```json
+{
+  "id": "diffusiongemma-...",
+  "object": "chat.completion",
+  "choices": [{"message": {"role": "assistant", "content": "..."}, "finish_reason": "stop"}],
+  "diffusion": {"had_thought": false, "truncated": false, "error": null, "stats": {...}, "wall_seconds": 4.2}
+}
+```
+
+`choices[0].message.content` is the final answer (thinking stripped, same as `eval_mmlu.py`'s scoring path). `diffusion.stats` carries the block/step/tok-per-second numbers from step 7. The server handles one request at a time — it's one subprocess behind a lock — so concurrent callers queue rather than run in parallel. There's no streaming yet: each call blocks until the full reply is generated.
+
+Body fields: `messages` (required, OpenAI chat format), `n_blocks` (optional, default 8), `seed` (optional, default 0).
