@@ -8,18 +8,23 @@ underlying binary handles one request at a time (it's a single subprocess readin
 one line of stdin at a time), so requests here are serialized behind a lock too.
 
   python3 scripts/diffusion_http_server.py --model /path/to/model-Q8_0.gguf
-  python3 scripts/diffusion_http_server.py --model ... --port 8000 --host 0.0.0.0
+
+Port defaults to 0 -- the OS picks a free one, printed on startup (and to
+diffusion_http.log under qsub) as "serving on http://<hostname>:<port>". Shared
+SCC nodes may already have a fixed port like 8000 taken by someone else's job,
+so don't assume you got the port you asked for -- read it back from the log.
 
 Then, from any machine that can reach host:port (see docs/diffusiongemma-scc.md for
 tunneling from an SCC compute node):
 
-  curl http://HOST:8000/v1/chat/completions \\
+  curl http://HOST:PORT/v1/chat/completions \\
       -H "Content-Type: application/json" \\
       -d '{"messages": [{"role": "user", "content": "Explain diffusion models in 3 sentences."}]}'
 """
 
 import argparse
 import json
+import socket
 import sys
 import threading
 import time
@@ -105,16 +110,21 @@ def main():
     ap.add_argument("--model", required=True, help="path to the DiffusionGemma GGUF")
     ap.add_argument("--server", default="llama-diffusion-gemma-visual-server",
                      help="path to the server binary (default: from PATH)")
-    ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=8000)
+    ap.add_argument("--host", default="0.0.0.0")
+    ap.add_argument("--port", type=int, default=0,
+                     help="0 (default) = let the OS pick a free port; shared SCC nodes may already "
+                          "have your requested port taken by another job")
     ap.add_argument("--ngl", type=int, default=99, help="layers on GPU")
     ap.add_argument("--maxtok", type=int, default=0, help="context budget (0 = auto-size to VRAM)")
     args = ap.parse_args()
 
     diffusion_server = DiffusionServer(args.server, args.model, args.ngl, args.maxtok, "diffusion_http.log")
-    print(f"model loaded, serving on http://{args.host}:{args.port}", file=sys.stderr)
 
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)
+    bound_host, bound_port = httpd.server_address
+    print(f"model loaded, serving on http://{socket.gethostname()}:{bound_port}", file=sys.stderr)
+    print(f"tunnel from your machine: ssh -L {bound_port}:{socket.gethostname()}:{bound_port} "
+          f"$USER@scc1.bu.edu", file=sys.stderr)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

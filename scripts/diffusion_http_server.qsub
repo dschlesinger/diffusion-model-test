@@ -7,12 +7,16 @@
 # Overrides (comma-separated, via -v):
 #   MODEL        GGUF path (required)
 #   LLAMA_BIN    dir holding llama-diffusion-gemma-visual-server (default ./llama.cpp/build/bin)
-#   PORT         default 8000
+#   PORT         default 0 -- OS picks a free port. Shared SCC nodes may already have a fixed
+#                port like 8000 held by someone else's job, so don't hardcode this. The real,
+#                bound port is printed to diffusion_http.log -- read it from there, not from
+#                whatever you asked for.
 #   CUDA_MODULE  default cuda/12.5
 #
-# Once it's running, find the compute node with `qstat -u $USER`, then tunnel from your
-# own machine (see docs/diffusiongemma-scc.md #10):
-#   ssh -L 8000:<compute-node-hostname>:8000 <user>@scc1.bu.edu
+# Once it's running:
+#   qstat -u $USER              # find the compute node
+#   tail -f diffusion_http.log  # prints "serving on http://<hostname>:<port>" plus a ready-made
+#                                # ssh -L tunnel command using the ACTUAL port
 #
 # Kill the job with `qdel <job-id>` when you're done -- it runs until h_rt or you stop it.
 
@@ -29,12 +33,13 @@ set -euo pipefail
 
 : "${MODEL:?set MODEL=/path/to/model.gguf with qsub -v}"
 LLAMA_BIN=${LLAMA_BIN:-$PWD/llama.cpp/build/bin}
-PORT=${PORT:-8000}
+PORT=${PORT:-0}
 CUDA_MODULE=${CUDA_MODULE:-cuda/12.5}
 
 module load gcc python3 "$CUDA_MODULE"
-echo "host=$(hostname) gpu=$(nvidia-smi --query-gpu=name --format=csv,noheader) model=$MODEL port=$PORT"
-echo "tunnel from your machine: ssh -L ${PORT}:$(hostname):${PORT} \$USER@scc1.bu.edu"
+echo "host=$(hostname) gpu=$(nvidia-smi --query-gpu=name --format=csv,noheader) model=$MODEL"
+# diffusion_http_server.py prints the actual bound port + tunnel command once it starts --
+# that line is the source of truth, not $PORT above.
 
 python3 scripts/diffusion_http_server.py \
     --model "$MODEL" \
